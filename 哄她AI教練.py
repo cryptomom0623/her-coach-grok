@@ -1,22 +1,27 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ====================== UI 優化設定 ======================
+# ====================== 頁面設定 ======================
 st.set_page_config(
     page_title="哄她AI教練 🤖❤️",
     layout="centered",
     page_icon="🌸",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"   # ← 隱藏左側邊欄
 )
 
-# 自訂柔和風格
+# 自訂柔和明亮的樣式（解決白色文字問題）
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #fff7f0 0%, #f5f0ff 100%);
+        background: linear-gradient(135deg, #fffaf0 0%, #f8f1ff 100%);
     }
-    .main > div {
-        padding-top: 2rem;
+    .main {
+        background-color: rgba(255, 255, 255, 0.98);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 10px 40px rgba(192, 132, 252, 0.12);
+        max-width: 800px;
+        margin: 0 auto;
     }
     h1 {
         font-size: 2.8rem !important;
@@ -24,6 +29,7 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 700;
+        text-align: center;
     }
     .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
         border-radius: 16px !important;
@@ -32,33 +38,38 @@ st.markdown("""
         background: linear-gradient(90deg, #e879f9, #c084fc);
         color: white;
         border-radius: 9999px;
-        height: 3.2rem;
-        font-size: 1.1rem;
+        height: 3.4rem;
+        font-size: 1.15rem;
         font-weight: 600;
         border: none;
-        box-shadow: 0 4px 15px rgba(232, 121, 249, 0.3);
-        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(232, 121, 249, 0.3);
     }
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(192, 132, 252, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(192, 132, 252, 0.4);
     }
-    .sidebar .css-1d391kg {
-        background-color: rgba(255,255,255,0.85);
-        border-radius: 20px;
+    /* 讓所有文字清晰可見 */
+    .stMarkdown, p, label, .stSelectbox label {
+        color: #4c1d95 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ====================== 主標題 ======================
+# ====================== 主內容 ======================
 st.title("🌸 哄她AI教練")
-st.markdown("<p style='text-align: center; color: #9f7aea; font-size: 1.25rem; margin-bottom: 2rem;'>讓每一次對話，都帶著溫柔與真心</p>", unsafe_allow_html=True)
+
+st.markdown("""
+<p style='text-align: center; color: #7e57c2; font-size: 1.3rem; margin-bottom: 2rem;'>
+    不知道怎麼溫柔地跟她說話？<br>
+    讓我幫你想出自然又有溫度的表達方式 💕
+</p>
+""", unsafe_allow_html=True)
 
 # ====================== 表單 ======================
 with st.form("coach_form"):
     col1, col2 = st.columns(2)
     with col1:
-        age = st.number_input("你的年紀", 18, 60, 28, help="這有助於調整語氣")
+        age = st.number_input("你的年紀", 18, 60, 28)
         job = st.text_input("你的職業", "工程師")
     with col2:
         gender = st.selectbox("你的性別", ["男性", "女性", "同志1（攻）", "同志0（受）"])
@@ -132,18 +143,3 @@ if submitted:
         except Exception as e:
             st.error(f"發生錯誤：{str(e)}")
             st.info("請確認 Secrets 中的 GEMINI_API_KEY 是否正確。")
-
-# ====================== 側邊欄 ======================
-st.sidebar.title("💡 使用說明")
-st.sidebar.info("這是一個溫柔的陪伴工具\n希望每一次對話都能讓你們更靠近💕")
-
-st.sidebar.markdown("### 本地測試")
-st.sidebar.code("""
-pip install -r requirements.txt
-streamlit run 哄她AI教練.py
-""", language="bash")
-
-st.sidebar.markdown("**重要**：請在 Settings → Secrets 中設定：")
-st.sidebar.code("""
-GEMINI_API_KEY = "你的 Gemini API Key"
-""", language="toml")
