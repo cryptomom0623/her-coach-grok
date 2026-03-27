@@ -9,39 +9,39 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 專業溫柔配色（參考 Calm / Headspace 風格）
+# 溫暖柔和配色（粉橘奶茶色系 - 女性會覺得溫暖）
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #fdf4ff 0%, #fff7f0 100%);
+        background: linear-gradient(135deg, #fff7f0 0%, #fff0f5 100%);
     }
     .main {
         background-color: #ffffff;
-        border-radius: 24px;
-        padding: 3rem 2.5rem;
-        box-shadow: 0 10px 40px rgba(139, 92, 246, 0.1);
+        border-radius: 28px;
+        padding: 3rem 2.8rem;
+        box-shadow: 0 15px 50px rgba(249, 168, 212, 0.18);
         max-width: 860px;
         margin: 2rem auto;
     }
     h1 {
         font-size: 2.9rem !important;
-        background: linear-gradient(90deg, #c026d3, #7c3aed);
+        background: linear-gradient(90deg, #f472b6, #fb923c);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 700;
         text-align: center;
     }
-    /* 所有文字強制深色 */
+    /* 強制所有文字為深色，避免白色字體 */
     h1, h2, h3, p, label, span, div, li, strong {
         color: #3f2a6b !important;
     }
-    /* 輸入框優化 - 白色底 + 清晰紫邊 */
+    /* 輸入框優化 - 白色底 + 溫暖粉邊 */
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input,
     .stSelectbox > div > div > select,
     .stTextArea > div > div > textarea {
         background-color: #ffffff !important;
-        border: 2px solid #d8b4fe !important;
+        border: 2px solid #fcc5d8 !important;
         border-radius: 16px !important;
         color: #3f2a6b !important;
         font-size: 1.05rem;
@@ -50,20 +50,28 @@ st.markdown("""
     .stNumberInput > div > div > input:focus,
     .stSelectbox > div > div > select:focus,
     .stTextArea > div > div > textarea:focus {
-        border-color: #c026d3 !important;
-        box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
+        border-color: #f472b6 !important;
+        box-shadow: 0 0 0 3px rgba(249, 168, 212, 0.2);
     }
     .stButton > button {
-        background: linear-gradient(90deg, #e879f9, #c084fc);
+        background: linear-gradient(90deg, #f472b6, #fb923c);
         color: white;
         border-radius: 9999px;
         height: 3.6rem;
         font-size: 1.2rem;
         font-weight: 600;
-        box-shadow: 0 6px 25px rgba(232, 121, 249, 0.3);
+        box-shadow: 0 8px 25px rgba(249, 168, 212, 0.3);
     }
     .stButton > button:hover {
         transform: translateY(-3px);
+    }
+    .talk-box {
+        background-color: #ffffff;
+        border: 2px solid #fcc5d8;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin: 1.2rem 0;
+        box-shadow: 0 4px 15px rgba(249, 168, 212, 0.15);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -115,7 +123,7 @@ if submitted:
         "🌱 一株小嫩芽剛冒出來...",
         "🌿 慢慢長出可愛的綠葉...",
         "🌸 開始開出小小的愛心花朵...",
-        "🌺 花朵越來越茂盛漂亮...",
+        "🌺 花朵越來越茂盛...",
         "🍓 結出粉嫩可愛的果實...",
         "✨ 果實成熟發光，可以摘取囉！"
     ]
@@ -125,14 +133,14 @@ if submitted:
     for i in range(len(growth_stages)):
         with placeholder.container():
             st.markdown(f"""
-            <div style="text-align: center; font-size: 5.2rem; margin: 2.5rem 0; line-height: 1;">
+            <div style="text-align: center; font-size: 5rem; margin: 2.5rem 0;">
                 {['🌱','🌿','🌸','🌺','🍓','✨'][i]}
             </div>
             <p style="text-align: center; font-size: 1.35rem; color: #6b21a8; font-weight: 500;">
                 {growth_stages[i]}
             </p>
             """, unsafe_allow_html=True)
-        time.sleep(0.75)
+        time.sleep(0.7)
 
     placeholder.empty()
 
@@ -147,7 +155,7 @@ if submitted:
 
 請生成 4 句最適合、最自然的溫柔表達方式（必須是可以直接對她說的話）。
 
-同時請為每一句打分（1~5星）。
+同時請為每一句打分（1~5星），並提供後續建議與雷區。
 
 請嚴格按照以下格式輸出：
 ---
@@ -162,6 +170,20 @@ if submitted:
 
 **表達方式 4**（溫柔描述） ★★★★☆
 「實際要說的話」
+
+💕 **後續感情升溫建議**
+• 具體作法1 → 簡短結論
+• 具體作法2 → 簡短結論
+• 具體作法3 → 簡短結論
+
+溫暖鼓勵：一段簡短鼓勵的話
+
+⚠️ **這階段要注意的雷區**
+• 雷區1 → 為什麼要避免 + 建議做法
+• 雷區2 → 為什麼要避免 + 建議做法
+• 雷區3 → 為什麼要避免 + 建議做法
+
+溫暖鼓勵：一段簡短鼓勵的話
 ---"""
 
     try:
@@ -170,31 +192,16 @@ if submitted:
         
         st.success("🌸 已為你生成溫柔自然的表達方式")
         
-        # 提取內容
+        # 提取4句
         import re
-        segments = re.split(r'\*\*表達方式 \d\*\*', full_result)
-        talks = []
-        stars = []
-        
-        for seg in segments[1:]:
-            star_match = re.search(r'★+', seg)
-            star_str = star_match.group(0) if star_match else "★★★☆☆"
-            stars.append(star_str)
-            
-            talk_match = re.search(r'「(.*?)」', seg)
-            talk = talk_match.group(1).strip() if talk_match else "（請稍後再試）"
-            talks.append(talk)
+        talk_matches = re.findall(r'「(.*?)」', full_result)
+        talks = [talk.strip() for talk in talk_matches[:4]] if len(talk_matches) >= 4 else ["（請稍後再試）"] * 4
 
-        if len(talks) < 4:
-            talks = ["（請稍後再試）"] * 4
-            stars = ["★★★★☆"] * 4
-
-        st.markdown("### 📝 以下是為你準備的溫柔表達方式（AI 已幫你評分）")
+        st.markdown("### 📝 以下是為你準備的溫柔表達方式")
 
         for i in range(4):
             st.markdown(f"""
             <div class="talk-box">
-                <div class="stars">AI推薦指數：{stars[i]} ({len(stars[i])}/5)</div>
                 <strong>第 {i+1} 句</strong><br><br>
                 {talks[i]}
             </div>
