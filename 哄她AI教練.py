@@ -9,39 +9,38 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 柔和清晰樣式
+# 徹底解決白色字體問題 + 柔和風格
 st.markdown("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #f8f4ff 0%, #fff8f0 100%);
     }
     .main {
-        background-color: rgba(255, 255, 255, 0.97);
+        background-color: rgba(255, 255, 255, 0.98);
         border-radius: 28px;
         padding: 3rem 2.5rem;
         box-shadow: 0 15px 50px rgba(139, 92, 246, 0.12);
         max-width: 860px;
         margin: 0 auto;
     }
-    h1 {
-        font-size: 2.9rem !important;
-        background: linear-gradient(90deg, #c026d3, #7c3aed);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-        text-align: center;
+    h1, h2, h3, p, label, span, div, li {
+        color: #4c1d95 !important;   /* 深紫色，確保清晰 */
     }
-    label, .stMarkdown p, .stSelectbox label {
-        color: #4c1d95 !important;
-        font-weight: 500;
+    .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
+        border-radius: 18px !important;
     }
-    .stButton > button {
-        background: linear-gradient(90deg, #e879f9, #c084fc);
-        color: white;
-        border-radius: 9999px;
-        height: 3.5rem;
-        font-size: 1.15rem;
-        font-weight: 600;
+    /* 單獨框框樣式 */
+    .talk-box {
+        background-color: #ffffff;
+        border: 2px solid #e0bbff;
+        border-radius: 20px;
+        padding: 1.2rem 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 15px rgba(192, 132, 252, 0.15);
+    }
+    .talk-box:hover {
+        border-color: #c026d3;
+        box-shadow: 0 6px 20px rgba(192, 132, 252, 0.25);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -102,13 +101,9 @@ if submitted:
 - 她的名字：{her_name}，星座：{zodiac}
 - 目前情境：{situation}
 
-請生成以下內容，用溫柔自然的中文：
+請生成 4 句最適合、最自然的溫柔表達方式。
 
-1. 生成 4 句最適合的溫柔表達方式
-2. 後續感情升溫建議（3點：具體作法 + 簡短結論）
-3. 這階段要注意的雷區（3點：具體提醒 + 建議做法）
-
-輸出格式請嚴格如下：
+請只輸出以下格式，不要加入其他說明：
 ---
 **表達方式 1**（溫柔描述）
 「實際要說的話」
@@ -121,49 +116,35 @@ if submitted:
 
 **表達方式 4**（溫柔描述）
 「實際要說的話」
-
-💕 **後續感情升溫建議**
-• 具體作法1 → 簡短結論
-• 具體作法2 → 簡短結論
-• 具體作法3 → 簡短結論
-
-溫暖鼓勵：一段鼓勵的話
-
-⚠️ **這階段要注意的雷區**
-• 雷區1 → 為什麼要避免 + 建議做法
-• 雷區2 → 為什麼要避免 + 建議做法
-• 雷區3 → 為什麼要避免 + 建議做法
-
-溫暖鼓勵：一段鼓勵的話
----
-
-語氣要溫柔、真誠、自然，像朋友給建議一樣。"""
+---"""
 
     try:
         response = model.generate_content(prompt)
         full_result = response.text
-        
         my_bar.empty()
         
         st.success("🌸 已為你生成溫柔自然的表達方式")
-        st.markdown(full_result)
         
-        # 提取4句純表達（用於單獨複製）
+        # 提取4句純文字
         import re
         talk_matches = re.findall(r'「(.*?)」', full_result)
         talks = [talk.strip() for talk in talk_matches[:4]] if len(talk_matches) >= 4 else ["（請稍後再試）"] * 4
 
-        # ====================== 單句複製按鈕 ======================
-        st.markdown("### 📋 選擇你要複製的表達方式")
-        cols = st.columns(4)
+        # ====================== 獨立框框顯示 ======================
+        st.markdown("### 📝 以下是為你準備的溫柔表達方式")
         
         for i in range(4):
-            with cols[i]:
-                if st.button(f"複製第 {i+1} 句", key=f"copy_{i}"):
-                    st.code(talks[i], language=None)
-                    st.toast(f"✅ 已複製第 {i+1} 句！可以直接發給她了～", icon="🌸")
-        
+            st.markdown(f"""
+            <div class="talk-box">
+                <strong>第 {i+1} 句</strong><br>
+                {talks[i]}
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 完整詳細建議
         st.markdown("---")
+        st.markdown("### 💡 完整建議（後續升溫與注意事項）")
+        st.markdown(full_result)
         
     except Exception as e:
         my_bar.empty()
