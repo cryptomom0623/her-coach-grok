@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 st.title("🤖 哄她AI教練")
-st.subheader("不知道怎麼哄女生？讓 Gemini 即時幫你生成自然話術")
+st.subheader("不知道怎麼跟她說話？讓我幫你生成溫柔自然的表達方式")
 st.markdown("---")
 
 # ====================== 表單 ======================
@@ -28,10 +28,10 @@ with st.form("coach_form"):
   
     her_name = st.text_input("她的名字 / 暱稱", "小薇")
     situation = st.text_area("目前情境（越詳細越好）",
-        placeholder="例如：她今天突然對我很冷淡、她送我一個小禮物、她說今天工作很累...",
+        placeholder="例如：她今天突然對我有點冷淡、她送我一個小禮物、她說今天工作很累...",
         height=120)
   
-    submitted = st.form_submit_button("🚀 生成專屬哄她話術", type="primary")
+    submitted = st.form_submit_button("🚀 生成溫柔自然的表達方式", type="primary")
 
 # ====================== Gemini API 呼叫 ======================
 if submitted:
@@ -40,45 +40,47 @@ if submitted:
         st.stop()
     
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    model = genai.GenerativeModel('gemini-2.5-flash')   # 免費額度較多的模型
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
-    prompt = f"""你是最頂尖的情感教練，專門教男生如何自然、真誠地哄女生。
+    prompt = f"""你是一位溫柔細心的情感陪伴者，專門幫助男生用真誠、自然的方式表達心意，讓女生感受到被珍惜與重視。
+
 以下是使用者資訊：
 - 性別：{gender}，年紀：{age}歲，職業：{job}
-- 關係階段：{relation}
+- 目前關係階段：{relation}
 - 她的名字：{her_name}，星座：{zodiac}
 - 目前情境：{situation}
 
-請根據「海王六大句型公式」為他生成 **4 句最適合、最自然的客製化話術**：
-1. 你不要這樣…不然我會怎麼樣…
-2. 這是我第一次…
-3. 沒想到妳怎麼樣…其他人都做不到
-4. 我發現妳怎麼樣…
-5. 要是有你在就好了…
-6. 妳不準怎麼樣…不然我就會…
+請根據以下 6 種溫柔的表達方式，為他生成 **4 句最適合、最自然的客製化話術**：
 
-輸出格式必須嚴格如下（用中文）：
+1. 用溫柔的拒絕姿態表達喜歡（例如：你不要這樣…不然我會…）
+2. 讓她感受到自己很特別（例如：這是我第一次…）
+3. 用驚喜的方式肯定她（例如：沒想到你這麼…）
+4. 給她溫暖的正面肯定（例如：我發現你其實很…）
+5. 柔軟地表達想念或需要她（例如：要是有你在就好了…）
+6. 用關心的語氣展現重視（例如：你不準再…不然我會擔心…）
+
+輸出格式請嚴格如下（用溫柔自然的中文）：
 ---
-**推薦話術 1**（句型名稱）
+**表達方式 1**（溫柔描述）
 「實際要說的話」
 
-**底層邏輯**：簡短說明
-**預期反應**：女生可能有的感覺
+**為什麼有效**：簡短說明
+**可能帶給她的感覺**：她可能會有的正面感受
 
 （請依序輸出 4 句）
 ---
 
-語氣要自然、真誠、溫柔，避免太油或太刻意。根據關係階段和情境選擇最適合的句型。"""
+請讓每一句話都聽起來真誠、有溫度、自然，像日常真心說出的話。避免油膩、刻意或技巧感。根據關係階段和目前情境，選擇最適合她的表達方式。"""
 
-    with st.spinner("正在為你生成專屬話術..."):
+    with st.spinner("正在為你生成溫柔自然的表達方式..."):
         try:
             response = model.generate_content(prompt)
             result = response.text
             
-            st.success("✅ 已生成專屬話術！")
+            st.success("✅ 已生成溫柔自然的表達方式！")
             st.markdown(result)
             
-            if st.button("📋 複製全部話術"):
+            if st.button("📋 複製全部內容"):
                 st.code(result, language=None)
                 st.toast("✅ 已複製到剪貼簿！", icon="✅")
                 
@@ -88,15 +90,23 @@ if submitted:
 
 # ====================== 側邊欄 ======================
 st.sidebar.title("📢 如何讓別人使用？")
-st.sidebar.markdown("### 本地測試")
+st.sidebar.markdown("### 1. 本地測試")
 st.sidebar.code("""
 pip install -r requirements.txt
 streamlit run 哄她AI教練.py
 """, language="bash")
 
-st.sidebar.markdown("**重要**：請在 Streamlit Settings → Secrets 中設定：")
+st.sidebar.markdown("### 2. 免費公開部署")
+st.sidebar.markdown("""
+1. 把程式碼推到 GitHub  
+2. 前往 https://share.streamlit.io/  
+3. 點「New app」→ 選擇你的 GitHub 倉庫  
+4. 部署完成後會給你一個公開連結
+""")
+
+st.sidebar.markdown("**重要**：請在 Streamlit Cloud 的 Settings → Secrets 中設定：")
 st.sidebar.code("""
 GEMINI_API_KEY = "你的 Gemini API Key"
 """, language="toml")
 
-st.sidebar.info("💡 這是完全免費方案，適合個人使用與分享！")
+st.sidebar.info("💡 這是完全免費的版本，適合個人使用與分享給朋友。")
