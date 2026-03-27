@@ -9,44 +9,71 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 強制深色文字 + 柔和背景（徹底解決白色字體問題）
+# 溫柔明亮柔和風格（解決黑框問題）
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #f8f4ff 0%, #fff8f0 100%);
+        background: linear-gradient(135deg, #fdf4ff 0%, #fff7f0 100%);
     }
     .main {
         background-color: rgba(255, 255, 255, 0.98);
         border-radius: 28px;
-        padding: 3rem 2.5rem;
-        box-shadow: 0 15px 50px rgba(139, 92, 246, 0.12);
-        max-width: 850px;
-        margin: 0 auto;
+        padding: 3rem 2.8rem;
+        box-shadow: 0 20px 60px rgba(192, 132, 252, 0.18);
+        max-width: 860px;
+        margin: 2rem auto;
     }
-    h1, h2, h3, .stMarkdown, p, label, span, div {
-        color: #4c1d95 !important;   /* 深紫色，確保清晰 */
+    h1 {
+        font-size: 3rem !important;
+        background: linear-gradient(90deg, #db2777, #9333ea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+        text-align: center;
     }
-    .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
-        border-radius: 18px !important;
+    /* 表單輸入框優化 - 解決黑框問題 */
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input,
+    .stSelectbox > div > div > select,
+    .stTextArea > div > div > textarea {
+        background-color: #ffffff !important;
+        border: 2px solid #e0bbff !important;
+        border-radius: 16px !important;
+        color: #4c1d95 !important;
+        font-size: 1.05rem;
+    }
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus,
+    .stSelectbox > div > div > select:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: #c026d3 !important;
+        box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+    }
+    label {
+        color: #6b21a8 !important;
+        font-weight: 600;
+        font-size: 1.1rem;
     }
     .stButton > button {
         background: linear-gradient(90deg, #e879f9, #c084fc);
-        color: white !important;
+        color: white;
         border-radius: 9999px;
-        height: 3.5rem;
-        font-size: 1.15rem;
+        height: 3.6rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        margin: 0.4rem 0;
+        box-shadow: 0 8px 25px rgba(232, 121, 249, 0.3);
     }
     .stButton > button:hover {
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(192, 132, 252, 0.4);
     }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🌸 哄她AI教練")
+
 st.markdown("""
-<p style='text-align: center; color: #6b21a8; font-size: 1.35rem; margin-bottom: 2.5rem;'>
+<p style='text-align: center; color: #7e57c2; font-size: 1.4rem; margin-bottom: 3rem;'>
     讓每一次對話，都帶著溫柔與真心 💕
 </p>
 """, unsafe_allow_html=True)
@@ -71,11 +98,11 @@ with st.form("coach_form"):
     
     situation = st.text_area("目前的情境或她的近況", 
         placeholder="例如：她今天突然對我有點冷淡、她送了我一個小禮物、她說最近工作很累...",
-        height=130)
+        height=140)
 
     submitted = st.form_submit_button("🌸 生成溫柔自然的表達方式")
 
-# ====================== 生成 ======================
+# ====================== 生成部分（保持不變） ======================
 if submitted:
     if "GEMINI_API_KEY" not in st.secrets:
         st.error("⚠️ 請先在 Settings → Secrets 中設定 GEMINI_API_KEY")
@@ -84,7 +111,6 @@ if submitted:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     model = genai.GenerativeModel('gemini-2.5-flash')
     
-    # 可愛動畫
     progress_text = "正在用心為你準備溫柔的表達方式..."
     my_bar = st.progress(0, text=progress_text)
     
@@ -102,7 +128,7 @@ if submitted:
 
 請生成 4 句最適合、最自然的溫柔表達方式。
 
-輸出格式請嚴格如下（只輸出這 4 句，不要加多餘說明）：
+輸出格式請嚴格如下：
 ---
 **表達方式 1**（溫柔描述）
 「實際要說的話」
@@ -122,37 +148,25 @@ if submitted:
     try:
         response = model.generate_content(prompt)
         full_result = response.text
-        
         my_bar.empty()
         
         st.success("🌸 已為你生成溫柔自然的表達方式")
         st.markdown(full_result)
         
-        # 提取 4 句純表達
+        # 提取4句話
         import re
         talk_matches = re.findall(r'「(.*?)」', full_result)
         talks = [talk.strip() for talk in talk_matches[:4]] if len(talk_matches) >= 4 else ["（請稍後再試）"] * 4
 
-        # ====================== 單句複製區域 ======================
         st.markdown("### 📋 選擇你要複製的表達方式")
+        cols = st.columns(4)
         
         for i in range(4):
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                st.markdown(f"**第 {i+1} 句**")
-                st.write(talks[i])
-            with col2:
-                if st.button(f"複製", key=f"copy_btn_{i}"):
-                    st.session_state[f"copied_text_{i}"] = talks[i]
+            with cols[i]:
+                if st.button(f"複製第 {i+1} 句", key=f"copy_{i}"):
+                    st.code(talks[i], language=None)
                     st.toast(f"✅ 已複製第 {i+1} 句！可以直接發給她了～", icon="🌸")
         
-        # 如果有複製的內容，就顯示可複製區塊
-        for i in range(4):
-            if f"copied_text_{i}" in st.session_state:
-                st.code(st.session_state[f"copied_text_{i}"], language=None)
-                del st.session_state[f"copied_text_{i}"]  # 顯示一次後清除
-        
-        # 完整攻略
         st.markdown("---")
         st.markdown("### 💡 完整建議")
         st.markdown(full_result)
