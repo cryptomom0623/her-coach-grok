@@ -39,14 +39,10 @@ st.markdown("""
         background: linear-gradient(90deg, #e879f9, #c084fc);
         color: white;
         border-radius: 9999px;
-        height: 3.6rem;
-        font-size: 1.2rem;
+        height: 3.4rem;
+        font-size: 1.1rem;
         font-weight: 600;
-    }
-    /* 讓標題更明顯 */
-    .stMarkdown h3 {
-        color: #6b21a8 !important;
-        margin-top: 1.5rem;
+        margin: 0.3rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -82,7 +78,7 @@ with st.form("coach_form"):
 
     submitted = st.form_submit_button("🌸 生成溫柔自然的表達方式")
 
-# ====================== 生成流程 ======================
+# ====================== 生成 ======================
 if submitted:
     if "GEMINI_API_KEY" not in st.secrets:
         st.error("⚠️ 請先在 Settings → Secrets 中設定 GEMINI_API_KEY")
@@ -91,14 +87,14 @@ if submitted:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     model = genai.GenerativeModel('gemini-2.5-flash')
     
-    # 可愛漸進動畫
-    progress_text = "正在用心為你準備溫柔的話術與建議..."
+    # 可愛動畫
+    progress_text = "正在用心為你準備溫柔的表達方式..."
     my_bar = st.progress(0, text=progress_text)
     
     for percent in range(100):
         time.sleep(0.03)
         my_bar.progress(percent + 1, text=progress_text)
-    
+
     prompt = f"""你是一位溫柔細心的情感陪伴者。
 
 使用者資訊：
@@ -107,13 +103,9 @@ if submitted:
 - 她的名字：{her_name}，星座：{zodiac}
 - 目前情境：{situation}
 
-請生成以下內容，用溫柔自然的中文：
+請生成 4 句最適合、最自然的溫柔表達方式。
 
-1. 生成 4 句最適合的溫柔表達方式
-2. 後續感情升溫建議（3點具體作法 + 簡短結論 + 一句鼓勵）
-3. 這階段要注意的雷區（3點具體提醒 + 簡短結論 + 一句鼓勵）
-
-輸出格式請嚴格如下：
+輸出格式請嚴格如下（只輸出這 4 句，不要加多餘說明）：
 ---
 **表達方式 1**（溫柔描述）
 「實際要說的話」
@@ -126,37 +118,53 @@ if submitted:
 
 **表達方式 4**（溫柔描述）
 「實際要說的話」
-
-💕 **後續感情升溫建議**
-• 具體作法1 → 簡短結論
-• 具體作法2 → 簡短結論
-• 具體作法3 → 簡短結論
-
-溫暖鼓勵：一句鼓勵的話
-
-⚠️ **這階段要注意的雷區**
-• 雷區1 → 為什麼要避免 + 建議做法
-• 雷區2 → 為什麼要避免 + 建議做法
-• 雷區3 → 為什麼要避免 + 建議做法
-
-溫暖鼓勵：一句鼓勵的話
 ---
 
-語氣要溫柔、真誠，像朋友給建議一樣自然有溫度。"""
+語氣要真誠、自然、有溫度，像日常真心說出的話。"""
 
     try:
         response = model.generate_content(prompt)
-        result = response.text
+        full_result = response.text
         
-        my_bar.empty()   # 清除進度條
+        my_bar.empty()
         
         st.success("🌸 已為你生成溫柔自然的表達方式")
-        st.markdown(result)
+        st.markdown(full_result)
         
-        if st.button("📋 複製全部內容"):
-            st.code(result, language=None)
-            st.toast("✅ 已複製到剪貼簿！", icon="🌸")
-            
+        # ==================== 提取 4 句純表達 ====================
+        import re
+        talk_matches = re.findall(r'「(.*?)」', full_result)
+        
+        if len(talk_matches) >= 4:
+            talks = [talk.strip() for talk in talk_matches[:4]]
+        else:
+            lines = full_result.split('\n')
+            talks = []
+            for line in lines:
+                if '「' in line and '」' in line:
+                    talk = line.split('「')[-1].split('」')[0].strip()
+                    if talk:
+                        talks.append(talk)
+                if len(talks) >= 4:
+                    break
+            if len(talks) < 4:
+                talks = ["（請稍後再試）"] * 4
+
+        # ====================== 單句複製按鈕 ======================
+        st.markdown("### 📋 選擇你要複製的表達方式")
+        cols = st.columns(4)
+        
+        for i in range(4):
+            with cols[i]:
+                if st.button(f"複製第 {i+1} 句", key=f"copy_{i}"):
+                    st.code(talks[i], language=None)
+                    st.toast(f"✅ 已複製第 {i+1} 句！可以直接發給她了～", icon="🌸")
+        
+        # 完整攻略區域
+        st.markdown("---")
+        st.markdown("### 💡 完整建議（升溫建議與注意事項）")
+        st.markdown(full_result)
+        
     except Exception as e:
         my_bar.empty()
         st.error(f"發生錯誤：{str(e)}")
