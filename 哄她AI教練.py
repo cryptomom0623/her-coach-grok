@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
 st.set_page_config(
     page_title="哄她AI教練 🤖❤️",
@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 st.title("🤖 哄她AI教練")
-st.subheader("不知道怎麼哄女生？讓 Grok 即時幫你生成海王級話術")
+st.subheader("不知道怎麼哄女生？讓 Gemini 即時幫你生成自然話術")
 st.markdown("---")
 
 # ====================== 表單 ======================
@@ -31,27 +31,25 @@ with st.form("coach_form"):
         placeholder="例如：她今天突然對我很冷淡、她送我一個小禮物、她說今天工作很累...",
         height=120)
   
-    submitted = st.form_submit_button("🚀 讓 Grok 生成專屬哄她話術", type="primary")
+    submitted = st.form_submit_button("🚀 生成專屬哄她話術", type="primary")
 
-# ====================== Grok API 呼叫 ======================
+# ====================== Gemini API 呼叫 ======================
 if submitted:
-    if "XAI_API_KEY" not in st.secrets:
-        st.error("⚠️ API Key 未設定！請在 Streamlit Settings → Secrets 中設定 XAI_API_KEY")
+    if "GEMINI_API_KEY" not in st.secrets:
+        st.error("⚠️ 請先在 Streamlit Settings → Secrets 中設定 GEMINI_API_KEY")
         st.stop()
     
-    client = OpenAI(
-        api_key=st.secrets["XAI_API_KEY"],
-        base_url="https://api.x.ai/v1"
-    )
-  
-    prompt = f"""你是最頂尖的情感教練，專門教男生如何用「海王六大句型公式」自然地哄女生。
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    model = genai.GenerativeModel('gemini-2.5-flash')   # 免費額度較多的模型
+    
+    prompt = f"""你是最頂尖的情感教練，專門教男生如何自然、真誠地哄女生。
 以下是使用者資訊：
 - 性別：{gender}，年紀：{age}歲，職業：{job}
 - 關係階段：{relation}
 - 她的名字：{her_name}，星座：{zodiac}
 - 目前情境：{situation}
 
-請根據六大句型公式，為他生成**4句最適合、最自然的客製化話術**：
+請根據「海王六大句型公式」為他生成 **4 句最適合、最自然的客製化話術**：
 1. 你不要這樣…不然我會怎麼樣…
 2. 這是我第一次…
 3. 沒想到妳怎麼樣…其他人都做不到
@@ -64,25 +62,20 @@ if submitted:
 **推薦話術 1**（句型名稱）
 「實際要說的話」
 
-**底層邏輯**：xxx
-**預期反應**：xxx
+**底層邏輯**：簡短說明
+**預期反應**：女生可能有的感覺
 
 （請依序輸出 4 句）
 ---
 
-語氣要自然真誠，避免太油膩。根據關係階段和情境選擇最適合的句型。"""
+語氣要自然、真誠、溫柔，避免太油或太刻意。根據關係階段和情境選擇最適合的句型。"""
 
-    with st.spinner("Grok 正在為你深度分析情境並生成話術..."):
+    with st.spinner("正在為你生成專屬話術..."):
         try:
-            response = client.chat.completions.create(
-                model="grok-4-1-fast-reasoning",   # ← 已修正為正確模型名稱
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=1200,
-                temperature=0.75
-            )
-            result = response.choices[0].message.content
+            response = model.generate_content(prompt)
+            result = response.text
             
-            st.success("✅ Grok 已生成專屬話術！")
+            st.success("✅ 已生成專屬話術！")
             st.markdown(result)
             
             if st.button("📋 複製全部話術"):
@@ -91,27 +84,19 @@ if submitted:
                 
         except Exception as e:
             st.error(f"發生錯誤：{str(e)}")
-            st.info("提示：請確認 Secrets 中的 XAI_API_KEY 是否完整且正確。")
+            st.info("請確認 Secrets 中的 GEMINI_API_KEY 是否正確。")
 
 # ====================== 側邊欄 ======================
 st.sidebar.title("📢 如何讓別人使用？")
-st.sidebar.markdown("### 1. 本地測試")
+st.sidebar.markdown("### 本地測試")
 st.sidebar.code("""
 pip install -r requirements.txt
 streamlit run 哄她AI教練.py
 """, language="bash")
 
-st.sidebar.markdown("### 2. 免費公開部署（推薦）")
-st.sidebar.markdown("""
-1. 把程式碼推到 GitHub  
-2. 前往 https://share.streamlit.io/  
-3. 點「New app」→ 選擇你的 GitHub 倉庫  
-4. 部署完成後會給你一個公開連結
-""")
-
-st.sidebar.markdown("**重要**：請在 Streamlit Cloud 的 Settings → Secrets 中設定：")
+st.sidebar.markdown("**重要**：請在 Streamlit Settings → Secrets 中設定：")
 st.sidebar.code("""
-XAI_API_KEY = "你的完整Grok API Key"
+GEMINI_API_KEY = "你的 Gemini API Key"
 """, language="toml")
 
-st.sidebar.info("💡 部署完成後，把公開連結分享給朋友即可使用！")
+st.sidebar.info("💡 這是完全免費方案，適合個人使用與分享！")
