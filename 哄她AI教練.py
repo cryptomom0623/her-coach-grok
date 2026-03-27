@@ -9,40 +9,37 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 柔和清晰樣式
+# 強制深色文字 + 柔和背景（徹底解決白色字體問題）
 st.markdown("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #f8f4ff 0%, #fff8f0 100%);
     }
     .main {
-        background-color: rgba(255, 255, 255, 0.97);
+        background-color: rgba(255, 255, 255, 0.98);
         border-radius: 28px;
         padding: 3rem 2.5rem;
         box-shadow: 0 15px 50px rgba(139, 92, 246, 0.12);
         max-width: 850px;
         margin: 0 auto;
     }
-    h1 {
-        font-size: 2.9rem !important;
-        background: linear-gradient(90deg, #c026d3, #7c3aed);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-        text-align: center;
+    h1, h2, h3, .stMarkdown, p, label, span, div {
+        color: #4c1d95 !important;   /* 深紫色，確保清晰 */
     }
-    label, .stMarkdown p, .stSelectbox label {
-        color: #4c1d95 !important;
-        font-weight: 500;
+    .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
+        border-radius: 18px !important;
     }
     .stButton > button {
         background: linear-gradient(90deg, #e879f9, #c084fc);
-        color: white;
+        color: white !important;
         border-radius: 9999px;
-        height: 3.4rem;
-        font-size: 1.1rem;
+        height: 3.5rem;
+        font-size: 1.15rem;
         font-weight: 600;
-        margin: 0.3rem 0;
+        margin: 0.4rem 0;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -131,38 +128,33 @@ if submitted:
         st.success("🌸 已為你生成溫柔自然的表達方式")
         st.markdown(full_result)
         
-        # ==================== 提取 4 句純表達 ====================
+        # 提取 4 句純表達
         import re
         talk_matches = re.findall(r'「(.*?)」', full_result)
-        
-        if len(talk_matches) >= 4:
-            talks = [talk.strip() for talk in talk_matches[:4]]
-        else:
-            lines = full_result.split('\n')
-            talks = []
-            for line in lines:
-                if '「' in line and '」' in line:
-                    talk = line.split('「')[-1].split('」')[0].strip()
-                    if talk:
-                        talks.append(talk)
-                if len(talks) >= 4:
-                    break
-            if len(talks) < 4:
-                talks = ["（請稍後再試）"] * 4
+        talks = [talk.strip() for talk in talk_matches[:4]] if len(talk_matches) >= 4 else ["（請稍後再試）"] * 4
 
-        # ====================== 單句複製按鈕 ======================
+        # ====================== 單句複製區域 ======================
         st.markdown("### 📋 選擇你要複製的表達方式")
-        cols = st.columns(4)
         
         for i in range(4):
-            with cols[i]:
-                if st.button(f"複製第 {i+1} 句", key=f"copy_{i}"):
-                    st.code(talks[i], language=None)
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                st.markdown(f"**第 {i+1} 句**")
+                st.write(talks[i])
+            with col2:
+                if st.button(f"複製", key=f"copy_btn_{i}"):
+                    st.session_state[f"copied_text_{i}"] = talks[i]
                     st.toast(f"✅ 已複製第 {i+1} 句！可以直接發給她了～", icon="🌸")
         
-        # 完整攻略區域
+        # 如果有複製的內容，就顯示可複製區塊
+        for i in range(4):
+            if f"copied_text_{i}" in st.session_state:
+                st.code(st.session_state[f"copied_text_{i}"], language=None)
+                del st.session_state[f"copied_text_{i}"]  # 顯示一次後清除
+        
+        # 完整攻略
         st.markdown("---")
-        st.markdown("### 💡 完整建議（升溫建議與注意事項）")
+        st.markdown("### 💡 完整建議")
         st.markdown(full_result)
         
     except Exception as e:
