@@ -90,8 +90,23 @@ if submitted:
 # ====================== 側邊欄部署教學 ======================
 st.sidebar.title("📢 如何讓別人使用？")
 
-st.sidebar.markdown("""
-### 1. 本地測試
-```bash
+st.sidebar.markdown("### 1. 本地測試")
+st.sidebar.code("""
 pip install -r requirements.txt
 streamlit run 哄她AI教練.py
+""", language="bash")
+
+st.sidebar.markdown("### 2. 免費公開部署（推薦）")
+st.sidebar.markdown("""
+1. 把程式碼推到 GitHub  
+2. 前往 https://share.streamlit.io/  
+3. 點「New app」→ 選擇你的 GitHub 倉庫  
+4. 部署完成後會給你一個公開連結
+""")
+
+st.sidebar.markdown("**重要**：請在 Streamlit Cloud 的 Settings → Secrets 中設定：")
+st.sidebar.code("""
+XAI_API_KEY = "xai-6wQYhzkmDX6CzAVIyf7MMmXYIM2qUtGTw4R0Kw1xTroMG57QSvHurTnjQ3n6zyOejLQsXyDPs886PJC9y"
+""", language="toml")
+
+st.sidebar.info("💡 部署完成後，把公開連結分享給朋友即可使用！")
