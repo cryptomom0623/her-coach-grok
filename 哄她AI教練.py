@@ -87,11 +87,11 @@ if submitted:
         st.code(result, language=None)
         st.toast("已複製到剪貼簿！", icon="✅")
 
-# ====================== 部署教學 ======================
+# ====================== 側邊欄部署教學 ======================
 st.sidebar.title("📢 如何讓別人使用？")
+
 st.sidebar.markdown("""
 ### 1. 本地測試
 ```bash
-pip install streamlit openai
-export XAI_API_KEY=你的金鑰
+pip install -r requirements.txt
 streamlit run 哄她AI教練.py
