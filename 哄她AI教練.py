@@ -8,27 +8,34 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 更舒服的柔和背景 + 清晰文字
+# 優化後的柔和清晰風格
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #f8f1ff 0%, #fff7f0 100%);
+        background: linear-gradient(135deg, #f8f4ff 0%, #fff8f0 100%);
     }
     .main {
-        background-color: rgba(255, 255, 255, 0.96);
+        background-color: rgba(255, 255, 255, 0.97);
         border-radius: 28px;
-        padding: 2.8rem 2rem;
-        box-shadow: 0 15px 40px rgba(192, 132, 252, 0.15);
+        padding: 3rem 2.5rem;
+        box-shadow: 0 15px 50px rgba(139, 92, 246, 0.12);
         max-width: 820px;
         margin: 0 auto;
     }
     h1 {
         font-size: 2.9rem !important;
-        background: linear-gradient(90deg, #d977f9, #a78bfa);
+        background: linear-gradient(90deg, #c026d3, #7c3aed);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 700;
         text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    /* 重要：讓表單標籤文字清晰可見 */
+    label, .stMarkdown p, .stSelectbox label, .stTextInput label {
+        color: #4c1d95 !important;
+        font-weight: 500;
+        font-size: 1.05rem;
     }
     .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
         border-radius: 18px !important;
@@ -37,21 +44,21 @@ st.markdown("""
         background: linear-gradient(90deg, #e879f9, #c084fc);
         color: white;
         border-radius: 9999px;
-        height: 3.5rem;
+        height: 3.6rem;
         font-size: 1.2rem;
         font-weight: 600;
-        box-shadow: 0 6px 20px rgba(232, 121, 249, 0.35);
+        box-shadow: 0 6px 25px rgba(232, 121, 249, 0.35);
     }
     .stButton > button:hover {
         transform: translateY(-3px);
-        box-shadow: 0 12px 30px rgba(192, 132, 252, 0.45);
+        box-shadow: 0 12px 35px rgba(192, 132, 252, 0.45);
     }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🌸 哄她AI教練")
 st.markdown("""
-<p style='text-align: center; color: #7e57c2; font-size: 1.35rem; margin-bottom: 2.5rem;'>
+<p style='text-align: center; color: #6b21a8; font-size: 1.35rem; margin-bottom: 2.5rem;'>
     讓每一次對話，都帶著溫柔與真心 💕
 </p>
 """, unsafe_allow_html=True)
@@ -99,9 +106,9 @@ if submitted:
 
 請生成以下內容（全部用溫柔自然的中文）：
 
-1. **4句最適合的表達方式**（根據六種溫柔表達方式）
-2. **💕 後續感情升溫建議**（給 3 點具體可執行的建議）
-3. **⚠️ 這階段要注意的雷區**（給 3 點容易犯的錯誤提醒）
+1. **4句最適合的表達方式**
+2. **💕 後續感情升溫建議**（3點具體建議）
+3. **⚠️ 這階段要注意的雷區**（3點常見錯誤）
 
 輸出格式請嚴格如下：
 ---
@@ -128,7 +135,7 @@ if submitted:
 • 第三點
 ---
 
-語氣要溫柔、真誠、有溫度，像朋友在給建議一樣自然。"""
+語氣要溫柔、真誠、有溫度，像朋友給建議一樣自然。"""
 
     with st.spinner("正在用心為你思考最適合的表達方式... 💭"):
         try:
@@ -144,7 +151,3 @@ if submitted:
                 
         except Exception as e:
             st.error(f"發生錯誤：{str(e)}")
-
-# ====================== 側邊欄 ======================
-st.sidebar.title("💡 小提醒")
-st.sidebar.info("這是一個溫柔的陪伴工具\n希望每一次對話都能讓你們更靠近 💕")
