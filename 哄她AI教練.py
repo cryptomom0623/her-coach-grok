@@ -9,38 +9,48 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 徹底解決白色字體問題 + 柔和風格
+# 柔和清晰樣式
 st.markdown("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #f8f4ff 0%, #fff8f0 100%);
     }
     .main {
-        background-color: rgba(255, 255, 255, 0.98);
+        background-color: rgba(255, 255, 255, 0.97);
         border-radius: 28px;
         padding: 3rem 2.5rem;
         box-shadow: 0 15px 50px rgba(139, 92, 246, 0.12);
         max-width: 860px;
         margin: 0 auto;
     }
-    h1, h2, h3, p, label, span, div, li {
-        color: #4c1d95 !important;   /* 深紫色，確保清晰 */
+    h1 {
+        font-size: 2.9rem !important;
+        background: linear-gradient(90deg, #c026d3, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+        text-align: center;
     }
-    .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
-        border-radius: 18px !important;
+    label, .stMarkdown p, .stSelectbox label {
+        color: #4c1d95 !important;
+        font-weight: 500;
     }
-    /* 單獨框框樣式 */
     .talk-box {
         background-color: #ffffff;
         border: 2px solid #e0bbff;
         border-radius: 20px;
-        padding: 1.2rem 1.5rem;
-        margin: 1rem 0;
+        padding: 1.4rem 1.6rem;
+        margin: 1.2rem 0;
         box-shadow: 0 4px 15px rgba(192, 132, 252, 0.15);
     }
     .talk-box:hover {
         border-color: #c026d3;
-        box-shadow: 0 6px 20px rgba(192, 132, 252, 0.25);
+        box-shadow: 0 6px 25px rgba(192, 132, 252, 0.25);
+    }
+    .stars {
+        color: #f59e0b;
+        font-size: 1.45rem;
+        margin-bottom: 0.6rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -103,18 +113,20 @@ if submitted:
 
 請生成 4 句最適合、最自然的溫柔表達方式。
 
-請只輸出以下格式，不要加入其他說明：
+同時請為每一句打分（1~5星），分數代表在當前情境與關係階段下的適合程度。
+
+請嚴格按照以下格式輸出（不要加入額外說明）：
 ---
-**表達方式 1**（溫柔描述）
+**表達方式 1**（溫柔描述） ★★★★☆
 「實際要說的話」
 
-**表達方式 2**（溫柔描述）
+**表達方式 2**（溫柔描述） ★★★★★
 「實際要說的話」
 
-**表達方式 3**（溫柔描述）
+**表達方式 3**（溫柔描述） ★★★☆☆
 「實際要說的話」
 
-**表達方式 4**（溫柔描述）
+**表達方式 4**（溫柔描述） ★★★★☆
 「實際要說的話」
 ---"""
 
@@ -125,23 +137,42 @@ if submitted:
         
         st.success("🌸 已為你生成溫柔自然的表達方式")
         
-        # 提取4句純文字
+        # 提取表達方式與星星
         import re
-        talk_matches = re.findall(r'「(.*?)」', full_result)
-        talks = [talk.strip() for talk in talk_matches[:4]] if len(talk_matches) >= 4 else ["（請稍後再試）"] * 4
-
-        # ====================== 獨立框框顯示 ======================
-        st.markdown("### 📝 以下是為你準備的溫柔表達方式")
+        # 提取每句話與星星
+        segments = re.split(r'\*\*表達方式 \d\*\*', full_result)
+        talks = []
+        stars = []
         
+        for seg in segments[1:]:  # 跳過第一段空內容
+            # 提取星星
+            star_match = re.search(r'★+', seg)
+            star_str = star_match.group(0) if star_match else "★★★☆☆"
+            stars.append(star_str)
+            
+            # 提取說的話
+            talk_match = re.search(r'「(.*?)」', seg)
+            talk = talk_match.group(1).strip() if talk_match else "（請稍後再試）"
+            talks.append(talk)
+
+        # 如果提取失敗，給預設值
+        if len(talks) < 4:
+            talks = ["（請稍後再試）"] * 4
+            stars = ["★★★★☆", "★★★★★", "★★★☆☆", "★★★★☆"]
+
+        # ====================== 帶推薦星星的框框 ======================
+        st.markdown("### 📝 以下是為你準備的溫柔表達方式（AI 已幫你評分）")
+
         for i in range(4):
             st.markdown(f"""
             <div class="talk-box">
-                <strong>第 {i+1} 句</strong><br>
+                <div class="stars">AI推薦指數：{stars[i]} ({len(stars[i])}/5)</div>
+                <strong>第 {i+1} 句</strong><br><br>
                 {talks[i]}
             </div>
             """, unsafe_allow_html=True)
 
-        # 完整詳細建議
+        # 完整建議區域
         st.markdown("---")
         st.markdown("### 💡 完整建議（後續升溫與注意事項）")
         st.markdown(full_result)
