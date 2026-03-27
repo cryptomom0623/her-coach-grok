@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+import time
 
 st.set_page_config(
     page_title="哄她AI教練 🤖❤️",
@@ -8,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 優化後的柔和清晰風格
+# 柔和清晰樣式
 st.markdown("""
 <style>
     .stApp {
@@ -19,7 +20,7 @@ st.markdown("""
         border-radius: 28px;
         padding: 3rem 2.5rem;
         box-shadow: 0 15px 50px rgba(139, 92, 246, 0.12);
-        max-width: 820px;
+        max-width: 850px;
         margin: 0 auto;
     }
     h1 {
@@ -29,16 +30,10 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         font-weight: 700;
         text-align: center;
-        margin-bottom: 0.5rem;
     }
-    /* 重要：讓表單標籤文字清晰可見 */
-    label, .stMarkdown p, .stSelectbox label, .stTextInput label {
+    label, .stMarkdown p, .stSelectbox label {
         color: #4c1d95 !important;
         font-weight: 500;
-        font-size: 1.05rem;
-    }
-    .stSelectbox, .stTextInput, .stNumberInput, .stTextArea {
-        border-radius: 18px !important;
     }
     .stButton > button {
         background: linear-gradient(90deg, #e879f9, #c084fc);
@@ -47,11 +42,11 @@ st.markdown("""
         height: 3.6rem;
         font-size: 1.2rem;
         font-weight: 600;
-        box-shadow: 0 6px 25px rgba(232, 121, 249, 0.35);
     }
-    .stButton > button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(192, 132, 252, 0.45);
+    /* 讓標題更明顯 */
+    .stMarkdown h3 {
+        color: #6b21a8 !important;
+        margin-top: 1.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -87,7 +82,7 @@ with st.form("coach_form"):
 
     submitted = st.form_submit_button("🌸 生成溫柔自然的表達方式")
 
-# ====================== Gemini API 呼叫 ======================
+# ====================== 生成流程 ======================
 if submitted:
     if "GEMINI_API_KEY" not in st.secrets:
         st.error("⚠️ 請先在 Settings → Secrets 中設定 GEMINI_API_KEY")
@@ -96,7 +91,15 @@ if submitted:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     model = genai.GenerativeModel('gemini-2.5-flash')
     
-    prompt = f"""你是一位溫柔細心的情感陪伴者，幫助男生用真誠自然的方式表達心意。
+    # 可愛漸進動畫
+    progress_text = "正在用心為你準備溫柔的話術與建議..."
+    my_bar = st.progress(0, text=progress_text)
+    
+    for percent in range(100):
+        time.sleep(0.03)
+        my_bar.progress(percent + 1, text=progress_text)
+    
+    prompt = f"""你是一位溫柔細心的情感陪伴者。
 
 使用者資訊：
 - 性別：{gender}，年紀：{age}歲，職業：{job}
@@ -104,11 +107,11 @@ if submitted:
 - 她的名字：{her_name}，星座：{zodiac}
 - 目前情境：{situation}
 
-請生成以下內容（全部用溫柔自然的中文）：
+請生成以下內容，用溫柔自然的中文：
 
-1. **4句最適合的表達方式**
-2. **💕 後續感情升溫建議**（3點具體建議）
-3. **⚠️ 這階段要注意的雷區**（3點常見錯誤）
+1. 生成 4 句最適合的溫柔表達方式
+2. 後續感情升溫建議（3點具體作法 + 簡短結論 + 一句鼓勵）
+3. 這階段要注意的雷區（3點具體提醒 + 簡短結論 + 一句鼓勵）
 
 輸出格式請嚴格如下：
 ---
@@ -125,29 +128,35 @@ if submitted:
 「實際要說的話」
 
 💕 **後續感情升溫建議**
-• 第一點
-• 第二點
-• 第三點
+• 具體作法1 → 簡短結論
+• 具體作法2 → 簡短結論
+• 具體作法3 → 簡短結論
+
+溫暖鼓勵：一句鼓勵的話
 
 ⚠️ **這階段要注意的雷區**
-• 第一點
-• 第二點
-• 第三點
+• 雷區1 → 為什麼要避免 + 建議做法
+• 雷區2 → 為什麼要避免 + 建議做法
+• 雷區3 → 為什麼要避免 + 建議做法
+
+溫暖鼓勵：一句鼓勵的話
 ---
 
-語氣要溫柔、真誠、有溫度，像朋友給建議一樣自然。"""
+語氣要溫柔、真誠，像朋友給建議一樣自然有溫度。"""
 
-    with st.spinner("正在用心為你思考最適合的表達方式... 💭"):
-        try:
-            response = model.generate_content(prompt)
-            result = response.text
+    try:
+        response = model.generate_content(prompt)
+        result = response.text
+        
+        my_bar.empty()   # 清除進度條
+        
+        st.success("🌸 已為你生成溫柔自然的表達方式")
+        st.markdown(result)
+        
+        if st.button("📋 複製全部內容"):
+            st.code(result, language=None)
+            st.toast("✅ 已複製到剪貼簿！", icon="🌸")
             
-            st.success("🌸 已為你生成溫柔自然的表達方式")
-            st.markdown(result)
-            
-            if st.button("📋 複製全部內容"):
-                st.code(result, language=None)
-                st.toast("✅ 已複製到剪貼簿！", icon="🌸")
-                
-        except Exception as e:
-            st.error(f"發生錯誤：{str(e)}")
+    except Exception as e:
+        my_bar.empty()
+        st.error(f"發生錯誤：{str(e)}")
