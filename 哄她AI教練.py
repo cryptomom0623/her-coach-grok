@@ -1,8 +1,11 @@
 import streamlit as st
 from openai import OpenAI
-import os
 
-st.set_page_config(page_title="哄她AI教練 🤖❤️", layout="centered", page_icon="❤️")
+st.set_page_config(
+    page_title="哄她AI教練 🤖❤️", 
+    layout="centered", 
+    page_icon="❤️"
+)
 
 st.title("🤖 哄她AI教練")
 st.subheader("不知道怎麼哄女生？讓 Grok 即時幫你生成海王級話術")
@@ -16,31 +19,32 @@ with st.form("coach_form"):
         job = st.text_input("你的職業", "工程師")
     with col2:
         gender = st.selectbox("你的性別", ["男性", "女性", "同志1（攻）", "同志0（受）"])
-    
-    relation = st.selectbox("與她的關係", 
+   
+    relation = st.selectbox("與她的關係",
         ["追求中", "互有好感", "曖昧", "情侶", "已婚", "離婚"])
-    zodiac = st.selectbox("她的星座", 
+    zodiac = st.selectbox("她的星座",
         ["白羊座","金牛座","雙子座","巨蟹座","獅子座","處女座",
          "天秤座","天蠍座","射手座","摩羯座","水瓶座","雙魚座"])
-    
+   
     her_name = st.text_input("她的名字 / 暱稱", "小薇")
-    situation = st.text_area("目前情境（越詳細越好）", 
+    situation = st.text_area("目前情境（越詳細越好）",
         placeholder="例如：她今天突然對我很冷淡、她送我一個小禮物、她說今天工作很累...",
         height=120)
-    
+   
     submitted = st.form_submit_button("🚀 讓 Grok 生成專屬哄她話術", type="primary")
 
 # ====================== Grok API 呼叫 ======================
 if submitted:
-    if not os.getenv("XAI_API_KEY"):
-        st.error("⚠️ 請先在程式碼上方設定你的 Grok API Key（環境變數 XAI_API_KEY）")
+    # 檢查 Secrets 是否設定
+    if "XAI_API_KEY" not in st.secrets:
+        st.error("⚠️ API Key 未設定！請在 Streamlit Settings → Secrets 中設定 XAI_API_KEY")
         st.stop()
     
     client = OpenAI(
-        api_key=os.getenv("XAI_API_KEY"),
+        api_key=st.secrets["XAI_API_KEY"],
         base_url="https://api.x.ai/v1"
     )
-    
+   
     prompt = f"""你是最頂尖的情感教練，專門教男生如何用「海王六大句型公式」哄女生。
 以下是使用者資訊：
 - 性別：{gender}，年紀：{age}歲，職業：{job}
@@ -70,22 +74,26 @@ if submitted:
 記得要自然、真誠、不要太油。根據當前關係階段和情境選擇最適合的句型。"""
 
     with st.spinner("Grok 正在為你深度分析情境並生成話術..."):
-        response = client.chat.completions.create(
-            model="grok-4",           # 或改成 "grok-4.1-fast" 更便宜
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1200,
-            temperature=0.75
-        )
-        result = response.choices[0].message.content
-
-    st.success("✅ Grok 已生成專屬話術！")
-    st.markdown(result)
-    
-    # 複製按鈕
-    st.button("📋 複製全部話術", on_click=lambda: st.session_state.update({"copy": result}))
-    if st.session_state.get("copy"):
-        st.code(result, language=None)
-        st.toast("已複製到剪貼簿！", icon="✅")
+        try:
+            response = client.chat.completions.create(
+                model="grok-4.1-fast-reasoning",   # 已修正為正確模型
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=1200,
+                temperature=0.75
+            )
+            result = response.choices[0].message.content
+            
+            st.success("✅ Grok 已生成專屬話術！")
+            st.markdown(result)
+            
+            # 複製按鈕
+            if st.button("📋 複製全部話術"):
+                st.code(result, language=None)
+                st.toast("已複製到剪貼簿！", icon="✅")
+                
+        except Exception as e:
+            st.error(f"發生錯誤：{str(e)}")
+            st.info("如果持續錯誤，請確認 Secrets 中的 XAI_API_KEY 是否正確。")
 
 # ====================== 側邊欄部署教學 ======================
 st.sidebar.title("📢 如何讓別人使用？")
